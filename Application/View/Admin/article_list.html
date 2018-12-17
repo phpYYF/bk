@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="renderer" content="webkit">
+    <title>拼图后台管理-后台管理</title>
+    <link rel="stylesheet" href="/Application/View/Admin/css/pintuer.css">
+    <link rel="stylesheet" href="/Application/View/Admin/css/admin.css">
+</head>
+
+<body>
+<div class="admin">
+<form method="post" action="">
+<div class="panel admin-panel">
+<div class="panel-head"><strong>文章检索</strong>&nbsp;&nbsp;&nbsp;&nbsp;
+	类别：
+    <select name="cat_id">
+    	<option value="">---请选择类别---</option>
+    	{foreach $data.cat_list as $rows}
+        	<option value="{$rows['cat_id']}" {(isset($data.condition.cat_id) && $rows['cat_id']==$data.condition.cat_id)?'selected':''}>{str_repeat('&nbsp;',$rows['deep']*4)}{$rows['cat_name']}</option>
+        {/foreach}
+    </select>
+    标题：<input type="text" name="art_title" value="{(isset($data.condition.art_title))?$data.condition.art_title:''}">
+    内容：<input type="text" name="art_content" value="{(isset($data.condition.art_content))?$data.condition.art_content:''}">
+    是否公开：<select name="art_public">
+    	<option value="">不限</option>
+        <option value="1" {(isset($data.condition.art_public)&&$data.condition.art_public==='1')?'selected':''}>是</option>
+        <option value="0" {(isset($data.condition.art_public)&&$data.condition.art_public==='0')?'selected':''}>否</option></select>
+    是否置顶：<select name="art_top">
+    	<option value="">不限</option>
+        <option value="1" {(isset($data.condition.art_top)&&$data.condition.art_top==='1')?'selected':''}>是</option>
+        <option value="0" {(isset($data.condition.art_top)&&$data.condition.art_top==='0')?'selected':''}>否</option></select>
+    <input type="submit"  value="搜索">
+</div>
+</div>
+<script type="text/javascript">
+window.onload=function(){
+	//全选和取消全选
+	var flag=false;
+	document.getElementById('selectAll').onclick=function(){
+		flag=!flag;
+		var checkbox_list=document.getElementsByName('id');
+		for(var i=0;i<checkbox_list.length;i++){
+			checkbox_list[i].checked=flag;
+		}	
+	}
+	//批量删除
+	document.getElementById('btn_more').onclick=function(){
+		var id_array=[];
+		var checkbox_list=document.getElementsByName('id');
+		for(var i=0;i<checkbox_list.length;i++){
+			if(checkbox_list[i].checked)
+				id_array.push(checkbox_list[i].value);
+		}	
+		ids=id_array.join();	//将id连接成字符串
+		if(ids=='')
+			return;
+		location.href='index.php?p=Admin&c=Article&a=del&art_id='+ids;
+	}
+}
+</script>
+</form>
+    <div class="panel admin-panel">
+    	<div class="panel-head"><strong>内容列表</strong></div>
+        <div class="padding border-bottom">
+            <input type="button" class="button button-small checkall" id="selectAll" name="checkall" checkfor="id" value="全选" />
+            <input type="button" class="button button-small border-green" value="添加文章" onClick="location.href='index.php?p=Admin&c=Article&a=add'"/>
+            <input type="button" class="button button-small border-yellow" id="btn_more" value="批量删除" />
+            <input type="button" class="button button-small border-blue" value="回收站" />
+        </div>
+        <table class="table table-hover">
+            <tr><th width="45">选择</th><th width="120">分类</th><th width="*">内容</th><th width="200">时间</th>
+            <th>是否公开</th><th>是否置顶</th>
+            <th width="200">操作</th></tr>
+{foreach $data.art_list as $rows}
+<tr>
+    <td><input type="checkbox" name="id" value="{$rows['art_id']}" /></td>
+    <td>{$rows['cat_name']}</td>
+    <td>{$rows['art_content']}</td>
+    <td>{$rows['art_time']|date_format:'%Y-%m-%d %H:%M:%S'}</td>
+    <td><img src="/Application/View/Admin/images/{($rows['art_public']==1)?'yes':'no'}.gif"></td>
+    <td><img src="/Application/View/Admin/images/{($rows['art_top']==1)?'yes':'no'}.gif"></td>
+    <td>
+       <a class="button border-blue button-little" href="index.php?p=Admin&c=Article&a=edit&art_id={$rows['art_id']}">修改</a>
+       <a class="button border-yellow button-little" href="index.php?p=Admin&c=Article&a=del&art_id={$rows['art_id']}" onclick="return confirm('确认删除?')">删除</a>
+{if $rows['art_top']==0}
+<a class="button border-blue button-little" href="index.php?p=Admin&c=Article&a=top&art_id={$rows['art_id']}&art_top=1">置顶</a>
+{else}
+<a class="button border-blue button-little" href="index.php?p=Admin&c=Article&a=top&art_id={$rows['art_id']}&art_top=0">取消置顶</a>
+{/if}
+         
+    </td>
+</tr>
+{/foreach}
+        </table>
+        <div class="panel-foot text-center">
+            {$data['pagestr']}
+        </div>
+    </div>
+    <br />
+    <p class="text-right text-gray">基于<a class="text-gray" target="_blank" href="#">传智播客</a>构建</p>
+</div>
+</body>
+</html>
